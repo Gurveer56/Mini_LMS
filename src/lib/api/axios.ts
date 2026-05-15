@@ -1,15 +1,20 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getData, setData, deleteData } from '@lib/storage/secureStorage';
+import { handleSessionExpired } from "@lib/auth/authBridge";
+import {
+  getSecureStorage,
+  setSecureStorage,
+} from "@lib/storage/secureStorage";
+import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 interface QueueItem {
   resolve: (token: string) => void;
-  reject: (error: any) => void;
+  reject: (error: unknown) => void;
 }
 
 let isRefreshing = false;
 let failedQueue: QueueItem[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((item) => {
     if (error) {
       item.reject(error);
@@ -20,28 +25,38 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+export const API_TIMEOUT_MS = 15_000;
+
 export const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://api.freeapi.app/api/v1',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || "https://api.freeapi.app/api/v1",
+  timeout: API_TIMEOUT_MS,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 apiClient.interceptors.request.use(
   async (config) => {
-    const token = await getData('accessToken');
+    const token = await getSecureStorage(SECURE_STORAGE_KEYS.accessToken);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -59,10 +74,14 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = await getData('refreshToken');
+        const refreshToken = await getSecureStorage(
+          SECURE_STORAGE_KEYS.refreshToken,
+        );
 
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          processQueue(new Error("No refresh token available"), null);
+          await handleSessionExpired();
+          throw new Error("No refresh token available");
         }
 
         const { data } = await axios.post(
@@ -72,14 +91,14 @@ apiClient.interceptors.response.use(
             headers: {
               Authorization: `Bearer ${refreshToken}`,
             },
-          }
+          },
         );
 
         const newAccessToken = data.data.accessToken;
         const newRefreshToken = data.data.refreshToken;
 
-        await setData('accessToken', newAccessToken);
-        await setData('refreshToken', newRefreshToken);
+        await setSecureStorage(SECURE_STORAGE_KEYS.accessToken, newAccessToken);
+        await setSecureStorage(SECURE_STORAGE_KEYS.refreshToken, newRefreshToken);
 
         processQueue(null, newAccessToken);
 
@@ -87,11 +106,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-
-        await deleteData('accessToken');
-        await deleteData('refreshToken');
-        await deleteData('user');
-
+        await handleSessionExpired();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -99,13 +114,17 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const api = {
-  get: <T>(url: string, params?: any) => apiClient.get<T>(url, { params }),
-  post: <T>(url: string, data?: any) => apiClient.post<T>(url, data),
-  put: <T>(url: string, data?: any) => apiClient.put<T>(url, data),
-  patch: <T>(url: string, data?: any) => apiClient.patch<T>(url, data),
+  get: <T>(url: string, params?: Record<string, unknown>) =>
+    apiClient.get<T>(url, { params }),
+  post: <T>(url: string, data?: unknown, config?: object) =>
+    apiClient.post<T>(url, data, config),
+  put: <T>(url: string, data?: unknown, config?: object) =>
+    apiClient.put<T>(url, data, config),
+  patch: <T>(url: string, data?: unknown, config?: object) =>
+    apiClient.patch<T>(url, data, config),
   delete: <T>(url: string) => apiClient.delete<T>(url),
 };
