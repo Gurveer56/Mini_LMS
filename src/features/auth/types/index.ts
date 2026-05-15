@@ -42,3 +42,21 @@ export interface LoginResponse {
   statusCode: number;
   success: boolean;
 }
+
+export interface UserStats {
+  enrolledCourses: number;
+  progressPercent: number;
+}
+
+export interface CurrentUserResponse {
+  data: LoginUser & {
+    stats?: {
+      enrolledCourses?: number;
+      progress?: number;
+      progressPercent?: number;
+    };
+  };
+  message: string;
+  statusCode: number;
+  success: boolean;
+}

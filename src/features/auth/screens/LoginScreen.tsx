@@ -56,6 +56,8 @@ export const LoginScreen = () => {
 
       setUsername('');
       setPassword('');
+
+      router.replace('/(main)/(tabs)/home');
     } catch (error: unknown) {
       const err = error as any;
       let errorMessage = 'Something went wrong';
