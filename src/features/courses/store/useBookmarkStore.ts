@@ -5,6 +5,8 @@ import {
   setAppStorageJSON,
 } from "@lib/storage/appStorage";
 import { create } from "zustand";
+import * as Notifications from 'expo-notifications';
+import { showApiErrorToast } from '@lib/api/showApiErrorToast';
 
 interface BookmarkState {
   bookmarkIds: Set<number>;
@@ -34,20 +36,33 @@ export const useBookmarkStore = create<BookmarkState>((set, get) => ({
         bookmarkIds: new Set(stored ?? []),
         isHydrated: true,
       });
-    } catch {
+    } catch (error) {
+      showApiErrorToast(error, { title: 'Bookmarks' });
       set({ bookmarkIds: new Set(), isHydrated: true });
     }
   },
 
   toggleBookmark: async (courseId: number) => {
     const next = new Set(get().bookmarkIds);
+    let justAdded = false;
     if (next.has(courseId)) {
       next.delete(courseId);
     } else {
       next.add(courseId);
+      justAdded = true;
     }
 
     set({ bookmarkIds: next });
+
+    if (justAdded && next.size === 5) {
+      void Notifications.scheduleNotificationAsync({
+        content: {
+          title: "You're on a roll! 🎉",
+          body: "You've bookmarked 5 courses. Great job keeping track of your favorites!",
+        },
+        trigger: null, 
+      });
+    }
 
     try {
       if (next.size === 0) {
@@ -55,8 +70,8 @@ export const useBookmarkStore = create<BookmarkState>((set, get) => ({
       } else {
         await persistBookmarks(next);
       }
-    } catch {
-      // Keep in-memory state even if persistence fails
+    } catch (error) {
+      showApiErrorToast(error, { title: 'Bookmarks' });
     }
   },
 

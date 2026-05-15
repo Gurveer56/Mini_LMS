@@ -10,6 +10,7 @@ import {
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
 import { Text } from '@shared/components/ui/text';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as React from 'react';
 import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -47,6 +48,13 @@ export const LoginScreen = () => {
         response.data.refreshToken,
         response.data.user
       );
+
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
 
       Toast.show({
         type: 'success',
