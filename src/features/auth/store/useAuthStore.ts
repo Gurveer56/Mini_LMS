@@ -7,6 +7,7 @@ import {
 } from "@lib/storage/secureStorage";
 import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
 import { create } from "zustand";
+import { showApiErrorToast } from "@lib/api/showApiErrorToast";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -53,7 +54,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch {
+    } catch (error) {
+      showApiErrorToast(error, { title: 'Authentication Error' });
       await clearAuthStorage();
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
@@ -73,8 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     try {
       await logoutUser();
-    } catch {
-      // Clear local session even if the server logout fails
+    } catch (error) {
+      showApiErrorToast(error, { title: 'Logout Failed' });
     }
     await clearAuthStorage();
     set({ user: null, isAuthenticated: false, isLoading: false });

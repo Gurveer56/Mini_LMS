@@ -1,12 +1,12 @@
-import { APP_STORAGE_KEYS } from "@lib/storage/storageKeys";
+import { showApiErrorToast } from "@lib/api/showApiErrorToast";
 import {
   deleteAppStorage,
   getAppStorageJSON,
   setAppStorageJSON,
 } from "@lib/storage/appStorage";
+import { APP_STORAGE_KEYS } from "@lib/storage/storageKeys";
+import * as Notifications from "expo-notifications";
 import { create } from "zustand";
-import * as Notifications from 'expo-notifications';
-import { showApiErrorToast } from '@lib/api/showApiErrorToast';
 
 interface BookmarkState {
   bookmarkIds: Set<number>;
@@ -17,10 +17,7 @@ interface BookmarkState {
 }
 
 const persistBookmarks = async (ids: Set<number>) => {
-  await setAppStorageJSON(
-    APP_STORAGE_KEYS.courseBookmarks,
-    Array.from(ids),
-  );
+  await setAppStorageJSON(APP_STORAGE_KEYS.courseBookmarks, Array.from(ids));
 };
 
 export const useBookmarkStore = create<BookmarkState>((set, get) => ({
@@ -37,7 +34,7 @@ export const useBookmarkStore = create<BookmarkState>((set, get) => ({
         isHydrated: true,
       });
     } catch (error) {
-      showApiErrorToast(error, { title: 'Bookmarks' });
+      showApiErrorToast(error, { title: "Bookmarks" });
       set({ bookmarkIds: new Set(), isHydrated: true });
     }
   },
@@ -60,7 +57,7 @@ export const useBookmarkStore = create<BookmarkState>((set, get) => ({
           title: "You're on a roll! 🎉",
           body: "You've bookmarked 5 courses. Great job keeping track of your favorites!",
         },
-        trigger: null, 
+        trigger: null,
       });
     }
 
@@ -71,7 +68,7 @@ export const useBookmarkStore = create<BookmarkState>((set, get) => ({
         await persistBookmarks(next);
       }
     } catch (error) {
-      showApiErrorToast(error, { title: 'Bookmarks' });
+      showApiErrorToast(error, { title: "Bookmarks" });
     }
   },
 
