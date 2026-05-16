@@ -3,9 +3,10 @@ import { refreshAuthTokens } from "@lib/auth/refreshTokens";
 import { logTokenState } from "@lib/auth/tokenDebug";
 import { getSecureStorage } from "@lib/storage/secureStorage";
 import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
-import axios, {
-  AxiosError,
+import {
   AxiosHeaders,
+  create,
+  type AxiosError,
   InternalAxiosRequestConfig,
 } from "axios";
 
@@ -37,7 +38,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 export const API_TIMEOUT_MS = 15_000;
 
-export const apiClient = axios.create({
+export const apiClient = create({
   baseURL: process.env.EXPO_PUBLIC_API_URL || "https://api.freeapi.app/api/v1",
   timeout: API_TIMEOUT_MS,
   headers: {

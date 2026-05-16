@@ -54,9 +54,6 @@ export const WelcomeScreen = () => {
           >
             Create account
           </Button>
-          <Text className="text-center text-foreground/50 text-xs mt-2">
-            Video plays while this screen is visible
-          </Text>
         </View>
       </View>
     </View>
