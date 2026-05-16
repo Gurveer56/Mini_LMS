@@ -5,7 +5,7 @@ import { useEnrollmentStore } from "@features/courses/store/useEnrollmentStore";
 import { Button } from "@shared/components/ui/button";
 import { Text } from "@shared/components/ui/text";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { Href, router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -185,6 +185,19 @@ export const CourseDetailScreen = () => {
               {course.description}
             </Text>
           </View>
+
+          <Button
+            variant="secondary"
+            className="w-full"
+            onPress={() =>
+              router.push(`/(main)/course/${courseId}/content` as Href)
+            }
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Feather name="book-open" size={18} color="#fafafa" />
+              <Text>View course content (WebView)</Text>
+            </View>
+          </Button>
 
           {/* {course.images.length > 1 ? (
             <View>
