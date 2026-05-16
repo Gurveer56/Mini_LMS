@@ -3,12 +3,16 @@ import { useAuthStore } from "@features/auth/store/useAuthStore";
 import {
   AccountDetailsCard,
   DeveloperToolsCard,
+  EnrolledCoursesSection,
   ProfileHeader,
   ProfileLogoutButton,
   ProfileStatsCard,
 } from "@features/profile/components";
 import { useProfileStats } from "@features/profile/hooks/useProfileStats";
 import { testAccessTokenRefresh } from "@lib/auth/testTokenRefresh";
+import { showDevTestNotification } from "@lib/notifications/courseNotifications";
+import { useEnrollmentStore } from "@features/courses/store/useEnrollmentStore";
+import { usePreferencesStore } from "@store/usePreferencesStore";
 import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -21,13 +25,24 @@ export const ProfileScreen = () => {
     useAuthStore();
   const { enrolledCourses, progressPercent, isHydrated: isStatsHydrated } =
     useProfileStats();
+  const enrolledIds = useEnrollmentStore((state) => state.enrolledIds);
+  const enrolledIdsArray = React.useMemo(() => Array.from(enrolledIds), [enrolledIds]);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarCacheKey, setAvatarCacheKey] = useState(0);
   const [isTestingRefresh, setIsTestingRefresh] = useState(false);
+  const [isDeveloperToolsExpanded, setIsDeveloperToolsExpanded] =
+    useState(false);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
+  const preferences = usePreferencesStore((state) => state.preferences);
+  const setShowHomeApiErrorTester = usePreferencesStore(
+    (state) => state.setShowHomeApiErrorTester,
+  );
+  const setDisableEnrollmentActions = usePreferencesStore(
+    (state) => state.setDisableEnrollmentActions,
+  );
 
   const avatarUri = localAvatar || user?.avatar?.url;
 
@@ -73,6 +88,17 @@ export const ProfileScreen = () => {
       });
     } finally {
       setIsTestingRefresh(false);
+    }
+  };
+
+  const handleShowNotification = async () => {
+    const shown = await showDevTestNotification();
+    if (!shown) {
+      Toast.show({
+        type: "error",
+        text1: "Notification blocked",
+        text2: "Notification permission was not granted.",
+      });
     }
   };
 
@@ -151,10 +177,28 @@ export const ProfileScreen = () => {
         isWide={isWide}
       />
 
+      <EnrolledCoursesSection 
+        enrolledIds={enrolledIdsArray}
+        isWide={isWide}
+      />
+
       <DeveloperToolsCard
+        isExpanded={isDeveloperToolsExpanded}
         isTestingRefresh={isTestingRefresh}
         isWide={isWide}
+        showHomeApiErrorTester={preferences.showHomeApiErrorTester}
+        disableEnrollmentActions={preferences.disableEnrollmentActions}
+        onToggleExpanded={() =>
+          setIsDeveloperToolsExpanded((current) => !current)
+        }
+        onToggleHomeApiErrorTester={(value) =>
+          void setShowHomeApiErrorTester(value)
+        }
+        onToggleDisableEnrollmentActions={(value) =>
+          void setDisableEnrollmentActions(value)
+        }
         onTestTokenRefresh={() => void handleTestTokenRefresh()}
+        onShowNotification={() => void handleShowNotification()}
       />
 
       <AccountDetailsCard user={user} isWide={isWide} />

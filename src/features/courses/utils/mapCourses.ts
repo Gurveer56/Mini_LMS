@@ -39,6 +39,37 @@ export const mapProductsToCourses = (
   });
 };
 
+export const mapProductAndInstructorToCourse = (
+  product: RandomProduct,
+  instructor: RandomUser,
+): Course => {
+  const thumbnail =
+    product.thumbnail ||
+    product.images?.find((uri) => uri.includes("thumbnail")) ||
+    product.images?.[0] ||
+    "";
+
+  return {
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    thumbnail,
+    images: product.images,
+    price: product.price,
+    rating: product.rating,
+    category: product.category,
+    brand: product.brand,
+    stock: product.stock,
+    discountPercentage: product.discountPercentage,
+    instructor: {
+      id: instructor.id,
+      name: `${instructor.name.first} ${instructor.name.last}`.trim(),
+      email: instructor.email,
+      picture: instructor.picture.medium,
+    },
+  };
+};
+
 export const filterCoursesByQuery = (
   courses: Course[],
   query: string,

@@ -1,16 +1,21 @@
 import { Feather } from "@expo/vector-icons";
 import { useAuthStore } from "@features/auth/store/useAuthStore";
+import { fetchRandomProductById, fetchRandomUserById } from "@features/courses/api";
+import { useCourseDetailStore } from "@features/courses/store/useCourseDetailStore";
 import { useCoursesStore } from "@features/courses/store/useCoursesStore";
 import {
+  buildNativeToWebScript,
+  createNativeToWebMessage,
   isAllowedWebViewNavigation,
   parseWebToNativeMessage,
 } from "@features/courses/webview/bridge";
 import { useCourseWebViewSource } from "@features/courses/webview/useCourseWebViewSource";
 import { toCourseWebPayload } from "@features/courses/webview/types";
+import { mapProductAndInstructorToCourse } from "@features/courses/utils/mapCourses";
 import { Button } from "@shared/components/ui/button";
 import { Text } from "@shared/components/ui/text";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -26,9 +31,21 @@ export const CourseContentWebViewScreen = () => {
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<WebView>(null);
 
-  const course = useCoursesStore((state) => state.getCourseById(courseId));
+  const catalogCourse = useCoursesStore((state) => state.getCourseById(courseId));
+  const selectedCourse = useCourseDetailStore((state) => state.selectedCourse);
+  const setSelectedCourse = useCourseDetailStore(
+    (state) => state.setSelectedCourse,
+  );
+  const markLessonComplete = useCourseDetailStore(
+    (state) => state.markLessonComplete,
+  );
   const userId = useAuthStore((state) => state.user?._id);
-  const coursePayload = course ? toCourseWebPayload(course) : null;
+  const course =
+    selectedCourse?.id === courseId ? selectedCourse : catalogCourse;
+  const coursePayload = useMemo(
+    () => (course ? toCourseWebPayload(course) : null),
+    [course],
+  );
 
   const {
     source,
@@ -40,6 +57,47 @@ export const CourseContentWebViewScreen = () => {
   const [isWebReady, setIsWebReady] = useState(false);
   const [webViewError, setWebViewError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+
+  useEffect(() => {
+    if (course || !Number.isFinite(courseId)) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchSelectedCourse = async () => {
+      try {
+        const [product, instructor] = await Promise.all([
+          fetchRandomProductById(courseId),
+          fetchRandomUserById(courseId),
+        ]);
+
+        if (isMounted) {
+          setSelectedCourse(mapProductAndInstructorToCourse(product, instructor));
+        }
+      } catch {
+        if (isMounted) {
+          setWebViewError("Could not load this course for the WebView.");
+        }
+      }
+    };
+
+    void fetchSelectedCourse();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [course, courseId, setSelectedCourse]);
+
+  useEffect(() => {
+    if (!coursePayload || !isWebReady) {
+      return;
+    }
+
+    webViewRef.current?.injectJavaScript(
+      buildNativeToWebScript(createNativeToWebMessage(coursePayload)),
+    );
+  }, [coursePayload, isWebReady]);
 
   const handleRetry = useCallback(() => {
     setWebViewError(null);
@@ -57,6 +115,11 @@ export const CourseContentWebViewScreen = () => {
       switch (message.type) {
         case "WEBVIEW_READY":
           setIsWebReady(true);
+          if (coursePayload) {
+            webViewRef.current?.injectJavaScript(
+              buildNativeToWebScript(createNativeToWebMessage(coursePayload)),
+            );
+          }
           break;
         case "LESSON_COMPLETE": {
           const payloadCourseId = message.payload?.courseId;
@@ -64,10 +127,11 @@ export const CourseContentWebViewScreen = () => {
             typeof payloadCourseId === "number" &&
             payloadCourseId === courseId
           ) {
+            void markLessonComplete(courseId);
             Toast.show({
               type: "success",
               text1: "Lesson complete",
-              text2: "Progress saved on device (demo).",
+              text2: "Progress saved on device.",
             });
           }
           break;
@@ -79,7 +143,7 @@ export const CourseContentWebViewScreen = () => {
           break;
       }
     },
-    [courseId],
+    [courseId, coursePayload, markLessonComplete],
   );
 
   if (!course) {
@@ -149,15 +213,16 @@ export const CourseContentWebViewScreen = () => {
             source={source}
             style={{ flex: 1, backgroundColor: "#09090b" }}
             originWhitelist={[
-              "file://",
+              "file://*",
               "https://app.local",
               "about:blank",
             ]}
             injectedJavaScriptBeforeContentLoaded={
               injectedJavaScriptBeforeContentLoaded
             }
+            injectedJavaScript={injectedJavaScriptBeforeContentLoaded}
             onMessage={handleWebMessage}
-            onLoadEnd={() => setWebViewError(null)}
+            onLoad={() => setWebViewError(null)}
             onError={() =>
               setWebViewError(
                 "The WebView failed to render the course page.",
@@ -175,7 +240,7 @@ export const CourseContentWebViewScreen = () => {
             thirdPartyCookiesEnabled={false}
             setSupportMultipleWindows={false}
             allowsBackForwardNavigationGestures={false}
-            allowFileAccess={false}
+            allowFileAccess
             allowUniversalAccessFromFileURLs={false}
             startInLoadingState
             renderLoading={() => (
@@ -192,7 +257,7 @@ export const CourseContentWebViewScreen = () => {
             >
               <ActivityIndicator size="large" color="#ffffff" />
               <Text className="text-muted-foreground mt-3 text-sm">
-                Loading lesson…
+                Loading lesson...
               </Text>
             </View>
           ) : null}
@@ -208,7 +273,7 @@ export const CourseContentWebViewScreen = () => {
         style={{ paddingBottom: insets.bottom + 8 }}
       >
         <Text className="text-muted-foreground text-xs text-center">
-          Secure bridge · headers + validated postMessage · no tokens in web
+          Secure bridge - headers + validated postMessage - no tokens in web
         </Text>
       </View>
     </View>

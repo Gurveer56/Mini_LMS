@@ -114,6 +114,7 @@ export const CoursesCatalog = ({
         {listHeaderTop}
         <CourseFiltersRow
           showBookmarksOnly={preferences.showBookmarksOnly}
+          showSimulateError={preferences.showHomeApiErrorTester}
           onToggleBookmarksOnly={handleToggleBookmarksOnly}
           onSimulateError={handleSimulateError}
         />
@@ -123,6 +124,7 @@ export const CoursesCatalog = ({
       handleSimulateError,
       handleToggleBookmarksOnly,
       listHeaderTop,
+      preferences.showHomeApiErrorTester,
       preferences.showBookmarksOnly,
     ],
   );

@@ -13,6 +13,9 @@ const HTML_MODULE = require("../../../../assets/webview/course-content.html");
 const FALLBACK_HTML = `<!DOCTYPE html>
 <html><body style="background:#09090b;color:#fafafa;font-family:sans-serif;padding:16px">
 <p>Course template could not be loaded from assets.</p>
+<script>
+window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({ type: "WEBVIEW_READY", payload: {}, v: 1 }));
+</script>
 </body></html>`;
 
 export interface CourseWebViewSourceState {

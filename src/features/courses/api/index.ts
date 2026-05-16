@@ -52,3 +52,25 @@ export const fetchCourseCatalogPage = async (page: number, limit = PAGE_SIZE) =>
     },
     { maxAttempts: 3 },
   );
+
+export const fetchRandomProductById = async (productId: number) =>
+  withRetry(
+    async () => {
+      const response = await api.get<{ data: RandomProduct }>(
+        `/public/randomproducts/${productId}`,
+      );
+      return response.data.data;
+    },
+    { maxAttempts: 3 },
+  );
+
+export const fetchRandomUserById = async (userId: number) =>
+  withRetry(
+    async () => {
+      const response = await api.get<{ data: RandomUser }>(
+        `/public/randomusers/${userId}`,
+      );
+      return response.data.data;
+    },
+    { maxAttempts: 3 },
+  );

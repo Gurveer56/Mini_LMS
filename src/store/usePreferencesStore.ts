@@ -8,11 +8,15 @@ import { create } from "zustand";
 export interface UserPreferences {
   showBookmarksOnly: boolean;
   lastCoursesSearch: string;
+  showHomeApiErrorTester: boolean;
+  disableEnrollmentActions: boolean;
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   showBookmarksOnly: false,
   lastCoursesSearch: "",
+  showHomeApiErrorTester: false,
+  disableEnrollmentActions: false,
 };
 
 interface PreferencesState {
@@ -21,6 +25,8 @@ interface PreferencesState {
   hydrate: () => Promise<void>;
   setShowBookmarksOnly: (value: boolean) => Promise<void>;
   setLastCoursesSearch: (query: string) => Promise<void>;
+  setShowHomeApiErrorTester: (value: boolean) => Promise<void>;
+  setDisableEnrollmentActions: (value: boolean) => Promise<void>;
   resetPreferences: () => Promise<void>;
 }
 
@@ -61,6 +67,28 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     const preferences = {
       ...get().preferences,
       lastCoursesSearch: query,
+    };
+    set({ preferences });
+    try {
+      await persistPreferences(preferences);
+    } catch {}
+  },
+
+  setShowHomeApiErrorTester: async (value: boolean) => {
+    const preferences = {
+      ...get().preferences,
+      showHomeApiErrorTester: value,
+    };
+    set({ preferences });
+    try {
+      await persistPreferences(preferences);
+    } catch {}
+  },
+
+  setDisableEnrollmentActions: async (value: boolean) => {
+    const preferences = {
+      ...get().preferences,
+      disableEnrollmentActions: value,
     };
     set({ preferences });
     try {
