@@ -48,7 +48,7 @@ export const RegisterScreen = () => {
         username,
         email,
         password,
-        role: 'ADMIN',
+        role: 'USER',
       });
 
       Toast.show({

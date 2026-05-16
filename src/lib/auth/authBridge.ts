@@ -21,5 +21,5 @@ export const clearAuthStorage = async (): Promise<void> => {
 export const handleSessionExpired = async (): Promise<void> => {
   await clearAuthStorage();
   onSessionExpired?.();
-  router.replace("/(auth)/login");
+  router.replace("/(auth)/welcome");
 };

@@ -1,11 +1,17 @@
 import { getCurrentUser, logoutUser } from "@features/auth/api/session";
 import { LoginUser } from "@features/auth/types";
 import { clearAuthStorage } from "@lib/auth/authBridge";
+import { refreshAuthTokens } from "@lib/auth/refreshTokens";
+import {
+  getAppStorage,
+  setAppStorage,
+  deleteAppStorage,
+} from "@lib/storage/appStorage";
 import {
   getSecureStorage,
   setSecureStorage,
 } from "@lib/storage/secureStorage";
-import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
+import { APP_STORAGE_KEYS, SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
 import { create } from "zustand";
 import { showApiErrorToast } from "@lib/api/showApiErrorToast";
 
@@ -13,6 +19,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: LoginUser | null;
+  localAvatar: string | null;
   login: (
     accessToken: string,
     refreshToken: string,
@@ -21,16 +28,23 @@ interface AuthState {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateUser: (userData: Partial<LoginUser>) => Promise<void>;
+  setLocalAvatar: (uri: string | null) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isLoading: true,
   user: null,
+  localAvatar: null,
 
   checkAuth: async () => {
     try {
-      const token = await getSecureStorage(SECURE_STORAGE_KEYS.accessToken);
+      const [token, localAvatar] = await Promise.all([
+        getSecureStorage(SECURE_STORAGE_KEYS.accessToken),
+        getAppStorage(APP_STORAGE_KEYS.localAvatar),
+      ]);
+      
+      set({ localAvatar });
 
       if (!token) {
         set({ user: null, isAuthenticated: false, isLoading: false });
@@ -55,7 +69,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      showApiErrorToast(error, { title: 'Authentication Error' });
+      try {
+        await refreshAuthTokens();
+        const response = await getCurrentUser();
+        const user = response.data;
+        await setSecureStorage(SECURE_STORAGE_KEYS.user, JSON.stringify(user));
+        set({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return;
+      } catch {
+        // Refresh failed — fall through to logout
+      }
+
+      showApiErrorToast(error, { title: "Authentication Error" });
       await clearAuthStorage();
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
@@ -79,7 +108,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       showApiErrorToast(error, { title: 'Logout Failed' });
     }
     await clearAuthStorage();
-    set({ user: null, isAuthenticated: false, isLoading: false });
+    await deleteAppStorage(APP_STORAGE_KEYS.localAvatar);
+    set({ user: null, isAuthenticated: false, isLoading: false, localAvatar: null });
   },
 
   updateUser: async (userData: Partial<LoginUser>) => {
@@ -92,5 +122,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       );
       set({ user: updatedUser });
     }
+  },
+
+  setLocalAvatar: async (uri: string | null) => {
+    if (uri) {
+      await setAppStorage(APP_STORAGE_KEYS.localAvatar, uri);
+    } else {
+      await deleteAppStorage(APP_STORAGE_KEYS.localAvatar);
+    }
+    set({ localAvatar: uri });
   },
 }));
