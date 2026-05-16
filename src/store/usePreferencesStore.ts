@@ -54,9 +54,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     set({ preferences });
     try {
       await persistPreferences(preferences);
-    } catch {
-      // Keep in-memory preference
-    }
+    } catch {}
   },
 
   setLastCoursesSearch: async (query: string) => {
@@ -67,17 +65,13 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     set({ preferences });
     try {
       await persistPreferences(preferences);
-    } catch {
-      // Keep in-memory preference
-    }
+    } catch {}
   },
 
   resetPreferences: async () => {
     set({ preferences: DEFAULT_PREFERENCES });
     try {
       await persistPreferences(DEFAULT_PREFERENCES);
-    } catch {
-      // Keep in-memory preference
-    }
+    } catch {}
   },
 }));
