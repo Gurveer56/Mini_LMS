@@ -24,6 +24,10 @@ export default function MainLayout() {
         name="course/[id]"
         options={{ animation: "slide_from_right" }}
       />
+      <Stack.Screen
+        name="course/[id]/content"
+        options={{ animation: "slide_from_right" }}
+      />
     </Stack>
   );
 }

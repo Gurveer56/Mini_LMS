@@ -1,6 +1,6 @@
+import { api } from "@lib/api/axios";
 import { consumeDummyCourseApiError } from "@lib/api/debugErrors";
 import { createSimulatedApiError } from "@lib/api/errors";
-import { api } from "@lib/api/axios";
 import { withRetry } from "@lib/api/retry";
 import {
   PaginatedResponse,
@@ -8,7 +8,7 @@ import {
   RandomUser,
 } from "../types";
 
-export const PAGE_SIZE = 20;
+export const PAGE_SIZE = 10;
 
 const assertNoDummyFailure = (): void => {
   if (consumeDummyCourseApiError()) {

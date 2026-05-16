@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>Course Content</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #09090b;
+        --card: #18181b;
+        --text: #fafafa;
+        --muted: #a1a1aa;
+        --accent: #ffffff;
+        --border: #27272a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        padding: 16px;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 10px;
+        margin-bottom: 12px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 8px;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .card h2 {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 0 0 6px;
+        font-weight: 600;
+      }
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .pill {
+        background: #27272a;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+      }
+      #status {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 20px;
+      }
+      button {
+        width: 100%;
+        margin-top: 16px;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent);
+        color: var(--bg);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      button:active {
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="badge" id="platform-badge">Loading…</div>
+    <h1 id="course-title">Course content</h1>
+    <p class="meta" id="course-meta"></p>
+
+    <div class="card">
+      <h2>Instructor</h2>
+      <p id="instructor-name"></p>
+      <p id="instructor-email" style="color: var(--muted); font-size: 0.9rem"></p>
+    </div>
+
+    <div class="card">
+      <h2>About</h2>
+      <p id="course-description"></p>
+      <div class="pill-row" id="course-pills"></div>
+    </div>
+
+    <p id="status">Waiting for native context…</p>
+    <button type="button" id="mark-complete">Mark lesson complete</button>
+
+    <script>
+      (function () {
+        var RN = window.ReactNativeWebView;
+
+        function post(type, payload) {
+          if (!RN) return;
+          RN.postMessage(
+            JSON.stringify({
+              type: type,
+              payload: payload || {},
+              v: 1,
+            }),
+          );
+        }
+
+        function readHeaders() {
+          return window.__NATIVE_HEADERS__ || {};
+        }
+
+        function readCourse() {
+          return window.__COURSE_PAYLOAD__ || null;
+        }
+
+        function render() {
+          var headers = readHeaders();
+          var course = readCourse();
+          var platform = headers["X-Platform"] || "unknown";
+
+          document.getElementById("platform-badge").textContent =
+            "Native · " + platform;
+
+          if (!course) {
+            document.getElementById("status").textContent =
+              "No course payload from native.";
+            return;
+          }
+
+          document.getElementById("course-title").textContent = course.title;
+          document.getElementById("course-meta").textContent =
+            course.category + " · " + course.brand;
+          document.getElementById("instructor-name").textContent =
+            course.instructor.name;
+          document.getElementById("instructor-email").textContent =
+            course.instructor.email;
+          document.getElementById("course-description").textContent =
+            course.description;
+
+          var pills = document.getElementById("course-pills");
+          pills.innerHTML = "";
+          [
+            "Rating " + course.rating,
+            "$" + course.price,
+            course.discountPercentage + "% off",
+            course.stock + " seats",
+          ].forEach(function (label) {
+            var el = document.createElement("span");
+            el.className = "pill";
+            el.textContent = label;
+            pills.appendChild(el);
+          });
+
+          document.getElementById("status").textContent =
+            "Synced with native (course #" + headers["X-Course-Id"] + ")";
+        }
+
+        document
+          .getElementById("mark-complete")
+          .addEventListener("click", function () {
+            var course = readCourse();
+            post("LESSON_COMPLETE", {
+              courseId: course ? course.id : null,
+            });
+          });
+
+        window.addEventListener("message", function (event) {
+          try {
+            var data =
+              typeof event.data === "string"
+                ? JSON.parse(event.data)
+                : event.data;
+            if (data && data.type === "COURSE_UPDATE" && data.payload) {
+              window.__COURSE_PAYLOAD__ = data.payload;
+              render();
+            }
+          } catch (e) {
+            /* ignore malformed */
+          }
+        });
+
+        render();
+        post("WEBVIEW_READY");
+      })();
+    </script>
+  </body>
+</html>
