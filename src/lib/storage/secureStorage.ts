@@ -5,7 +5,6 @@ export { SECURE_STORAGE_KEYS };
 
 type SecureCache = Map<string, string>;
 
-/** Shared across bundles — avoids duplicate module instances losing the in-memory cache. */
 const getMemoryCache = (): SecureCache => {
   const globalScope = globalThis as typeof globalThis & {
     __hoeSecureCache?: SecureCache;
@@ -46,7 +45,6 @@ export const clearSecureStorageCache = (): void => {
   getMemoryCache().clear();
 };
 
-/** Debug: compare in-memory vs SecureStore values. */
 export const readSecureStorageDebug = async (
   key: string,
 ): Promise<{ memory: string | null; secureStore: string | null }> => {

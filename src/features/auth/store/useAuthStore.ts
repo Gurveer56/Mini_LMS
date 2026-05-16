@@ -81,7 +81,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
         return;
       } catch {
-        // Refresh failed — fall through to logout
       }
 
       showApiErrorToast(error, { title: "Authentication Error" });
@@ -108,8 +107,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       showApiErrorToast(error, { title: 'Logout Failed' });
     }
     await clearAuthStorage();
-    await deleteAppStorage(APP_STORAGE_KEYS.localAvatar);
-    set({ user: null, isAuthenticated: false, isLoading: false, localAvatar: null });
+    // Delete all app storage keys (bookmarks, enrollments, etc.)
+    try {
+      const keys = Object.values(APP_STORAGE_KEYS);
+      await Promise.all(keys.map((key) => deleteAppStorage(key)));
+    } catch (error) {
+      console.error("Failed to clear app storage during logout:", error);
+    }
+    set({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      localAvatar: null,
+    });
   },
 
   updateUser: async (userData: Partial<LoginUser>) => {

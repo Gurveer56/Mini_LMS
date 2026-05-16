@@ -60,7 +60,6 @@ export default function RootLayout() {
       }
 
       if (finalStatus !== "granted") {
-        console.log("Notification permission not granted");
         return;
       }
 
@@ -79,16 +78,13 @@ export default function RootLayout() {
           repeats: false,
         },
       });
-      console.log("Notification scheduled for 24 hours from now");
     };
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
         void Notifications.cancelAllScheduledNotificationsAsync();
-        console.log("User is active, cancelling reminders");
       } else if (nextAppState === "background") {
         void scheduleReminder();
-        console.log("User went to background, scheduling reminder");
       }
     });
 

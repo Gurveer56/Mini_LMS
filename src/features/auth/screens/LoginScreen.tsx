@@ -50,10 +50,8 @@ export const LoginScreen = () => {
       );
 
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
       if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+        await Notifications.requestPermissionsAsync();
       }
 
       Toast.show({
@@ -134,7 +132,7 @@ export const LoginScreen = () => {
               </Button>
             </View>
             <Text className="text-center text-sm">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Text
                 className="text-sm underline underline-offset-4"
                 onPress={() => router.push('/(auth)/register')}
