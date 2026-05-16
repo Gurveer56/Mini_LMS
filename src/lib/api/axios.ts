@@ -1,6 +1,5 @@
 import { handleSessionExpired } from "@lib/auth/authBridge";
 import { refreshAuthTokens } from "@lib/auth/refreshTokens";
-import { logTokenState } from "@lib/auth/tokenDebug";
 import { getSecureStorage } from "@lib/storage/secureStorage";
 import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
 import {
@@ -18,7 +17,6 @@ interface QueueItem {
 export type RetriableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
   _retryWithoutAuth?: boolean;
-  /** Set on retried requests so the request interceptor uses this token immediately. */
   __freshAccessToken?: string;
 };
 
@@ -177,27 +175,10 @@ apiClient.interceptors.response.use(
       isAuthRoute(originalRequest) ||
       !isAccessTokenError(error)
     ) {
-      if (__DEV__ && error.response?.status === 401) {
-        console.log("[Auth] 401 not handled by refresh", {
-          hasConfig: Boolean(originalRequest),
-          isAuthRoute: originalRequest ? isAuthRoute(originalRequest) : false,
-          isAccessTokenError: isAccessTokenError(error),
-          url: originalRequest ? getRequestUrl(originalRequest) : "unknown",
-        });
-      }
       return Promise.reject(error);
     }
 
     const isPublic = isPublicApiRoute(originalRequest);
-
-    if (__DEV__) {
-      console.log("[Auth] 401 → attempting token refresh", {
-        url: getRequestUrl(originalRequest),
-        isPublic,
-        status: error.response?.status,
-        apiMessage: (error.response?.data as { message?: string })?.message,
-      });
-    }
 
     if (originalRequest._retryWithoutAuth) {
       return Promise.reject(error);
@@ -226,16 +207,8 @@ apiClient.interceptors.response.use(
       const tokens = await refreshAuthTokens();
       processQueue(null, tokens.accessToken);
 
-      if (__DEV__) {
-        console.log("[Auth] Refresh OK, retrying request with new token …");
-        await logTokenState("after refresh in interceptor");
-      }
-
       return retryRequest(originalRequest, tokens.accessToken);
     } catch (refreshError) {
-      if (__DEV__) {
-        console.error("[Auth] Refresh failed in interceptor:", refreshError);
-      }
       processQueue(refreshError, null);
 
       if (isPublic) {

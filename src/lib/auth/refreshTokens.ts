@@ -1,7 +1,5 @@
-import { logTokenState } from "@lib/auth/tokenDebug";
 import {
   getSecureStorage,
-  readSecureStorageDebug,
   setSecureStorage,
 } from "@lib/storage/secureStorage";
 import { SECURE_STORAGE_KEYS } from "@lib/storage/storageKeys";
@@ -42,31 +40,8 @@ const parseRefreshResponse = (payload: unknown): RefreshedTokens | null => {
 const persistTokens = async (tokens: RefreshedTokens): Promise<void> => {
   await setSecureStorage(SECURE_STORAGE_KEYS.accessToken, tokens.accessToken);
   await setSecureStorage(SECURE_STORAGE_KEYS.refreshToken, tokens.refreshToken);
-
-  const verified = await readSecureStorageDebug(SECURE_STORAGE_KEYS.accessToken);
-
-  if (verified.memory !== tokens.accessToken) {
-    console.error("[Auth] Access token memory mismatch after save", {
-      expected: tokens.accessToken.slice(0, 20),
-      got: verified.memory?.slice(0, 20) ?? null,
-    });
-    throw new Error("Failed to persist access token in memory cache");
-  }
-
-  if (verified.secureStore !== tokens.accessToken) {
-    console.warn(
-      "[Auth] SecureStore access token differs from memory (using memory for requests)",
-      {
-        memoryPreview: tokens.accessToken.slice(0, 20),
-        secureStorePreview: verified.secureStore?.slice(0, 20) ?? null,
-      },
-    );
-  }
 };
 
-/**
- * POST /users/refresh-token — freeapi.app expects `{ refreshToken }` in the body.
- */
 export const refreshAuthTokens = async (): Promise<RefreshedTokens> => {
   const refreshToken = await getSecureStorage(SECURE_STORAGE_KEYS.refreshToken);
 
@@ -74,13 +49,8 @@ export const refreshAuthTokens = async (): Promise<RefreshedTokens> => {
     throw new Error("No refresh token in secure storage");
   }
 
-  if (__DEV__) {
-    console.log("[Auth] Calling POST /users/refresh-token …");
-    await logTokenState("before refresh API");
-  }
-
   try {
-    const { data, status } = await axios.post(
+    const { data } = await axios.post(
       `${API_BASE_URL}/users/refresh-token`,
       { refreshToken },
       {
@@ -89,30 +59,15 @@ export const refreshAuthTokens = async (): Promise<RefreshedTokens> => {
       },
     );
 
-    if (__DEV__) {
-      console.log("[Auth] refresh-token response status:", status);
-    }
-
     const tokens = parseRefreshResponse(data);
 
     if (!tokens) {
-      console.error("[Auth] Unexpected refresh response shape:", data);
       throw new Error("Refresh response did not include accessToken/refreshToken");
     }
 
     await persistTokens(tokens);
-
-    if (__DEV__) {
-      await logTokenState("after refresh saved");
-    }
-
     return tokens;
   } catch (error) {
-    if (__DEV__) {
-      console.error("[Auth] refresh-token failed:", error);
-      await logTokenState("after refresh failed");
-    }
-
     if (isAxiosError(error)) {
       const apiMessage =
         typeof error.response?.data === "object" &&

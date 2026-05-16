@@ -24,12 +24,13 @@ export const updateAvatar = async (
           : "image/jpeg";
   }
 
-  // @ts-expect-error - React Native FormData expects an object with uri, name, type
-  formData.append("avatar", {
+  const avatarPart = {
     uri: localUri,
     name: finalFileName,
     type: finalMimeType,
-  });
+  } as unknown as Blob;
+
+  formData.append("avatar", avatarPart);
 
   const response = await apiClient.patch<UpdateAvatarResponse>(
     "/users/avatar",
