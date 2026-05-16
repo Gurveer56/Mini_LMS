@@ -63,7 +63,6 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
         });
       }
     } catch {
-      // Ignore corrupt cache
     } finally {
       set({ isCacheHydrated: true });
     }

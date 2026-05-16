@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { COURSE_CARD_IMAGE_URI } from "@features/courses/constants/courseImages";
 import { Course } from "@features/courses/types";
 import { getCourseItemKey } from "@features/courses/utils/courseListKeys";
 import { Text } from "@shared/components/ui/text";
@@ -29,12 +30,10 @@ export const CourseListItem = memo(
       void toggleBookmark(course.id);
     }, [course.id, toggleBookmark]);
 
-    // const imageUri =
-    //   course.thumbnail ||
-    //   course.images[0] ||
-    //   "https://images.unsplash.com/photo-1516321318423-f06f868e44f7?w=800&q=80";
-    
-    const imageUri ="https://img.freepik.com/free-photo/online-marketing_53876-176744.jpg?semt=ais_hybrid&w=740&q=80";
+    // API thumbnails are unreliable for this demo. Restore this block if testers ask
+    // to validate product images from the API.
+    // const imageUri = course.thumbnail || course.images[0] || COURSE_CARD_IMAGE_URI;
+    const imageUri = COURSE_CARD_IMAGE_URI;
 
     return (
       <Pressable

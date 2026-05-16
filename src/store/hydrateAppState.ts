@@ -1,5 +1,6 @@
 import { useAuthStore } from "@features/auth/store/useAuthStore";
 import { useBookmarkStore } from "@features/courses/store/useBookmarkStore";
+import { useCourseDetailStore } from "@features/courses/store/useCourseDetailStore";
 import { useCoursesStore } from "@features/courses/store/useCoursesStore";
 import { useEnrollmentStore } from "@features/courses/store/useEnrollmentStore";
 import { useNetworkStore } from "@store/useNetworkStore";
@@ -15,6 +16,7 @@ export const hydrateAppState = async (): Promise<void> => {
   await Promise.all([
     usePreferencesStore.getState().hydrate(),
     useBookmarkStore.getState().hydrate(),
+    useCourseDetailStore.getState().hydrate(),
     useEnrollmentStore.getState().hydrate(),
     useCoursesStore.getState().hydrateCache(),
     useAuthStore.getState().checkAuth(),

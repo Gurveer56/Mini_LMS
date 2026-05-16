@@ -7,12 +7,14 @@ import Toast from "react-native-toast-message";
 
 interface CourseFiltersRowProps {
   showBookmarksOnly: boolean;
+  showSimulateError: boolean;
   onToggleBookmarksOnly: () => void;
   onSimulateError: () => void;
 }
 
 export const CourseFiltersRow = memo(function CourseFiltersRow({
   showBookmarksOnly,
+  showSimulateError,
   onToggleBookmarksOnly,
   onSimulateError,
 }: CourseFiltersRowProps) {
@@ -37,7 +39,7 @@ export const CourseFiltersRow = memo(function CourseFiltersRow({
           {showBookmarksOnly ? "Saved only" : "All courses"}
         </Text>
       </Button>
-      {__DEV__ ? (
+      {showSimulateError ? (
         <Button variant="outline" size="sm" onPress={handleSimulateError}>
           <Text className="text-xs">Test API error</Text>
         </Button>
