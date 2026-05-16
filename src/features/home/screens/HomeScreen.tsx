@@ -1,53 +1,77 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { useAuthStore } from '@features/auth/store/useAuthStore';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@shared/components/ui/card';
+import { CoursesCatalog } from "@features/courses/components/CoursesCatalog";
+import { useBookmarkStore } from "@features/courses/store/useBookmarkStore";
+import { useCoursesStore } from "@features/courses/store/useCoursesStore";
+import { filterCoursesByQuery } from "@features/courses/utils/mapCourses";
+import { HomeTopBar } from "@features/home/components/HomeTopBar";
+import { usePreferencesStore } from "@store/usePreferencesStore";
+import { router } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const HomeScreen = () => {
-  const user = useAuthStore((state) => state.user);
+  const insets = useSafeAreaInsets();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const preferences = usePreferencesStore((state) => state.preferences);
+  const isPreferencesHydrated = usePreferencesStore((state) => state.isHydrated);
+  const setLastCoursesSearch = usePreferencesStore(
+    (state) => state.setLastCoursesSearch,
+  );
+  const courses = useCoursesStore((state) => state.courses);
+  const bookmarkIds = useBookmarkStore((state) => state.bookmarkIds);
+  const showBookmarksOnly = usePreferencesStore(
+    (state) => state.preferences.showBookmarksOnly,
+  );
+
+  const resultCount = useMemo(() => {
+    let list = filterCoursesByQuery(courses, searchQuery);
+    if (showBookmarksOnly) {
+      list = list.filter((course) => bookmarkIds.has(course.id));
+    }
+    return list.length;
+  }, [bookmarkIds, courses, searchQuery, showBookmarksOnly]);
+
+  useEffect(() => {
+    if (isPreferencesHydrated && preferences.lastCoursesSearch) {
+      setSearchQuery(preferences.lastCoursesSearch);
+    }
+  }, [isPreferencesHydrated, preferences.lastCoursesSearch]);
+
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      void setLastCoursesSearch(query);
+    },
+    [setLastCoursesSearch],
+  );
+
+  const handleProfilePress = useCallback(() => {
+    router.navigate("/(main)/(tabs)/profile");
+  }, []);
+
+  const listHeaderTop = useMemo(
+    () => (
+      <HomeTopBar
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onProfilePress={handleProfilePress}
+        resultCount={resultCount}
+      />
+    ),
+    [handleProfilePress, handleSearchChange, resultCount, searchQuery],
+  );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} className="bg-background">
-      <View className="mb-8">
-        <Text className="text-3xl font-bold text-foreground">Welcome back,</Text>
-        <Text className="text-xl text-primary font-semibold">{user?.username}!</Text>
-      </View>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Quick Stats</CardTitle>
-          <CardDescription>Your activity at a glance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <View className="flex-row justify-between">
-            <View>
-              <Text className="text-muted-foreground text-sm">Role</Text>
-              <Text className="text-foreground text-lg font-bold">{user?.role}</Text>
-            </View>
-            <View>
-              <Text className="text-muted-foreground text-sm">Status</Text>
-              <Text className="text-green-500 text-lg font-bold">Active</Text>
-            </View>
-          </View>
-        </CardContent>
-      </Card>
-
-      <View className="gap-4">
-        <Text className="text-xl font-bold text-foreground px-1">Your Overview</Text>
-        <Card>
-          <CardContent className="py-6">
-            <Text className="text-foreground text-center">No recent notifications.</Text>
-          </CardContent>
-        </Card>
-      </View>
-    </ScrollView>
+    <View
+      className="flex-1 bg-background"
+      style={{ paddingTop: insets.top }}
+    >
+      <CoursesCatalog
+        searchQuery={searchQuery}
+        listHeaderTop={listHeaderTop}
+        contentPaddingBottom={insets.bottom + 88}
+      />
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 60,
-  },
-});

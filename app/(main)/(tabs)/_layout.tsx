@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Tabs } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 
 export default function TabsLayout() {
   return (
@@ -7,43 +7,34 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#09090b',
-          borderTopColor: '#27272a',
+          backgroundColor: "#09090b",
+          borderTopColor: "#27272a",
           borderTopWidth: 1,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#a1a1aa',
+        tabBarActiveTintColor: "#ffffff",
+        tabBarInactiveTintColor: "#a1a1aa",
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontWeight: "600",
         },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="courses"
-        options={{
-          title: 'Courses',
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="book-open" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),
