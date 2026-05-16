@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { showApiErrorToast } from "@lib/api/showApiErrorToast";
 
 const PREFIX = "@hoe_app:";
 
@@ -33,7 +34,8 @@ export const getAppStorageJSON = async <T>(key: string): Promise<T | null> => {
   }
   try {
     return JSON.parse(raw) as T;
-  } catch {
+  } catch (error) {
+    showApiErrorToast(error, { title: 'Storage Error' });
     return null;
   }
 };
