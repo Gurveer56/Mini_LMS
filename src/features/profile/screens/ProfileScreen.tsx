@@ -13,7 +13,7 @@ import { showDevTestNotification } from "@lib/notifications/courseNotifications"
 import { useEnrollmentStore } from "@features/courses/store/useEnrollmentStore";
 import { usePreferencesStore } from "@store/usePreferencesStore";
 import * as ImagePicker from "expo-image-picker";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { Linking, ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -76,7 +76,6 @@ export const ProfileScreen = () => {
 
   const handleLogout = async () => {
     await logout();
-    router.replace("/(auth)/welcome");
   };
 
   const handleTestTokenRefresh = async () => {
@@ -211,8 +210,6 @@ export const ProfileScreen = () => {
           onShowNotification={() => void handleShowNotification()}
         />
       ) : null}
-
-      {/* <AccountDetailsCard user={user} isWide={isWide} /> */}
 
       <ProfileLogoutButton isWide={isWide} onLogout={handleLogout} />
     </ScrollView>

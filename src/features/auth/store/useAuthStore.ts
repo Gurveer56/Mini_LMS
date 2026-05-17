@@ -111,9 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const keys = Object.values(APP_STORAGE_KEYS);
       await Promise.all(keys.map((key) => deleteAppStorage(key)));
-    } catch (error) {
-      console.error("Failed to clear app storage during logout:", error);
-    }
+    } catch {}
     set({
       user: null,
       isAuthenticated: false,
