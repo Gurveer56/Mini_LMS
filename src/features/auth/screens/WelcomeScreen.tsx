@@ -1,13 +1,16 @@
 import { WelcomeVideoLayer } from "@features/auth/components/WelcomeVideoBackground";
 import { Button } from "@shared/components/Button";
 import { Text } from "@shared/components/ui/text";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
-import { StatusBar, View } from "react-native";
+import { StatusBar, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const WelcomeScreen = () => {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const logoWidth = Math.min(220, width * 0.58);
 
   return (
     <View className="flex-1 bg-background">
@@ -23,16 +26,20 @@ export const WelcomeScreen = () => {
         }}
       >
         <View className="flex-1 justify-center">
-          <View className="self-start rounded-full border border-white/20 bg-white/10 px-3 py-1 mb-6">
-            <Text className="text-foreground/90 text-xs font-semibold tracking-widest uppercase">
-              Mini LMS
-            </Text>
-          </View>
+          <Image
+            source={require("../../../../assets/images/brand-logo.png")}
+            style={{
+              width: logoWidth,
+              height: logoWidth / 3.33,
+              marginBottom: 24,
+            }}
+            contentFit="contain"
+          />
           <Text className="text-4xl font-bold text-foreground leading-tight">
             Learn without{"\n"}limits.
           </Text>
           <Text className="text-base text-foreground/75 mt-4 leading-6 max-w-[90%]">
-            Discover courses, track progress, and pick up where you left off —
+            Discover courses, track progress, and pick up where you left off -
             built for a smooth mobile experience.
           </Text>
         </View>
