@@ -1,7 +1,4 @@
 import { CoursesCatalog } from "@features/courses/components/CoursesCatalog";
-import { useBookmarkStore } from "@features/courses/store/useBookmarkStore";
-import { useCoursesStore } from "@features/courses/store/useCoursesStore";
-import { filterCoursesByQuery } from "@features/courses/utils/mapCourses";
 import { HomeTopBar } from "@features/home/components/HomeTopBar";
 import { usePreferencesStore } from "@store/usePreferencesStore";
 import { router } from "expo-router";
@@ -18,19 +15,6 @@ export const HomeScreen = () => {
   const setLastCoursesSearch = usePreferencesStore(
     (state) => state.setLastCoursesSearch,
   );
-  const courses = useCoursesStore((state) => state.courses);
-  const bookmarkIds = useBookmarkStore((state) => state.bookmarkIds);
-  const showBookmarksOnly = usePreferencesStore(
-    (state) => state.preferences.showBookmarksOnly,
-  );
-
-  const resultCount = useMemo(() => {
-    let list = filterCoursesByQuery(courses, searchQuery);
-    if (showBookmarksOnly) {
-      list = list.filter((course) => bookmarkIds.has(course.id));
-    }
-    return list.length;
-  }, [bookmarkIds, courses, searchQuery, showBookmarksOnly]);
 
   useEffect(() => {
     if (isPreferencesHydrated && preferences.lastCoursesSearch) {
@@ -56,10 +40,9 @@ export const HomeScreen = () => {
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onProfilePress={handleProfilePress}
-        resultCount={resultCount}
       />
     ),
-    [handleProfilePress, handleSearchChange, resultCount, searchQuery],
+    [handleProfilePress, handleSearchChange, searchQuery],
   );
 
   return (

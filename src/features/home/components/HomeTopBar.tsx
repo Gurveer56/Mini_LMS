@@ -10,21 +10,19 @@ interface HomeTopBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onProfilePress: () => void;
-  resultCount: number;
 }
 
 export const HomeTopBar = memo(function HomeTopBar({
   searchQuery,
   onSearchChange,
   onProfilePress,
-  resultCount,
 }: HomeTopBarProps) {
   const { user, localAvatar } = useAuthStore();
   const avatarUri = localAvatar || user?.avatar?.url;
   const initial = user?.username?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <View className="px-5 pb-4 gap-4">
+    <View className=" py-4 gap-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
           <Text className="text-muted-foreground text-sm">Welcome back</Text>
@@ -75,10 +73,6 @@ export const HomeTopBar = memo(function HomeTopBar({
           <Feather name="user" size={20} color="#fafafa" />
         </Pressable>
       </View>
-
-      <Text className="text-muted-foreground text-xs">
-        {resultCount} course{resultCount === 1 ? "" : "s"} available
-      </Text>
     </View>
   );
 });
