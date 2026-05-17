@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { showApiErrorToast } from "@lib/api/showApiErrorToast";
 
-const PREFIX = "@hoe_app:";
+const PREFIX = "@mini_lms:";
 
 const storageKey = (key: string) => `${PREFIX}${key}`;
 

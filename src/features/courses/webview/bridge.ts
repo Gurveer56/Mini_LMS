@@ -27,7 +27,7 @@ export const buildNativeWebViewHeaders = (params: {
   courseId: number;
   userId?: string;
 }): NativeWebViewHeaders => ({
-  "X-App-Id": "hoe-lms",
+  "X-App-Id": "mini-lms",
   "X-App-Version": Constants.expoConfig?.version ?? "1.0.0",
   "X-Platform": Platform.OS,
   "X-Course-Id": String(params.courseId),

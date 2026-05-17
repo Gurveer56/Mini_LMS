@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "HOE_Assignment",
-    "slug": "HOE_Assignment",
+    "name": "Mini LMS",
+    "slug": "mini-lms",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
-    "scheme": "hoeassignment",
+    "scheme": "minilms",
     "userInterfaceStyle": "automatic",
     "ios": {},
     "android": {
@@ -16,7 +16,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.singlemindinfotech2.HOE_Assignment"
+      "package": "com.singlemindinfotech2.minilms"
     },
     "web": {
       "output": "static",
@@ -38,8 +38,14 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/android-icon-monochrome.png",
-          "color": "#000000"
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#208AEF"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mini LMS needs access to your photos so you can choose a profile avatar."
         }
       ],
       "expo-video"
@@ -47,6 +53,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dd6ac5bd-a328-4683-a5be-e8e40f4455c0"
+      }
+    },
+    "owner": "gurveer_s1ngh"
   }
 }
