@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@features/auth/api/session";
 import { useAuthStore } from "@features/auth/store/useAuthStore";
 import {
-  AccountDetailsCard,
   DeveloperToolsCard,
   EnrolledCoursesSection,
   ProfileHeader,
@@ -16,7 +15,7 @@ import { usePreferencesStore } from "@store/usePreferencesStore";
 import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, useWindowDimensions } from "react-native";
+import { Linking, ScrollView, StyleSheet, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -26,7 +25,10 @@ export const ProfileScreen = () => {
   const { enrolledCourses, progressPercent, isHydrated: isStatsHydrated } =
     useProfileStats();
   const enrolledIds = useEnrollmentStore((state) => state.enrolledIds);
-  const enrolledIdsArray = React.useMemo(() => Array.from(enrolledIds), [enrolledIds]);
+  const enrolledIdsArray = React.useMemo(
+    () => Array.from(enrolledIds),
+    [enrolledIds],
+  );
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarCacheKey, setAvatarCacheKey] = useState(0);
@@ -103,13 +105,23 @@ export const ProfileScreen = () => {
   };
 
   const handlePickAvatar = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
+    const currentPermission =
+      await ImagePicker.getMediaLibraryPermissionsAsync();
+    const permission = currentPermission.granted
+      ? currentPermission
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
       Toast.show({
         type: "error",
-        text1: "Permission Required",
-        text2: "Sorry, we need camera roll permissions to make this work!",
+        text1: "Photo permission required",
+        text2: permission.canAskAgain
+          ? "Please allow photo access to choose an avatar."
+          : "Photo access is blocked. Open settings to allow it.",
       });
+      if (!permission.canAskAgain) {
+        void Linking.openSettings();
+      }
       return;
     }
 
@@ -177,31 +189,30 @@ export const ProfileScreen = () => {
         isWide={isWide}
       />
 
-      <EnrolledCoursesSection 
-        enrolledIds={enrolledIdsArray}
-        isWide={isWide}
-      />
+      <EnrolledCoursesSection enrolledIds={enrolledIdsArray} isWide={isWide} />
 
-      <DeveloperToolsCard
-        isExpanded={isDeveloperToolsExpanded}
-        isTestingRefresh={isTestingRefresh}
-        isWide={isWide}
-        showHomeApiErrorTester={preferences.showHomeApiErrorTester}
-        disableEnrollmentActions={preferences.disableEnrollmentActions}
-        onToggleExpanded={() =>
-          setIsDeveloperToolsExpanded((current) => !current)
-        }
-        onToggleHomeApiErrorTester={(value) =>
-          void setShowHomeApiErrorTester(value)
-        }
-        onToggleDisableEnrollmentActions={(value) =>
-          void setDisableEnrollmentActions(value)
-        }
-        onTestTokenRefresh={() => void handleTestTokenRefresh()}
-        onShowNotification={() => void handleShowNotification()}
-      />
+      {__DEV__ ? (
+        <DeveloperToolsCard
+          isExpanded={isDeveloperToolsExpanded}
+          isTestingRefresh={isTestingRefresh}
+          isWide={isWide}
+          showHomeApiErrorTester={preferences.showHomeApiErrorTester}
+          disableEnrollmentActions={preferences.disableEnrollmentActions}
+          onToggleExpanded={() =>
+            setIsDeveloperToolsExpanded((current) => !current)
+          }
+          onToggleHomeApiErrorTester={(value) =>
+            void setShowHomeApiErrorTester(value)
+          }
+          onToggleDisableEnrollmentActions={(value) =>
+            void setDisableEnrollmentActions(value)
+          }
+          onTestTokenRefresh={() => void handleTestTokenRefresh()}
+          onShowNotification={() => void handleShowNotification()}
+        />
+      ) : null}
 
-      <AccountDetailsCard user={user} isWide={isWide} />
+      {/* <AccountDetailsCard user={user} isWide={isWide} /> */}
 
       <ProfileLogoutButton isWide={isWide} onLogout={handleLogout} />
     </ScrollView>

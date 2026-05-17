@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { Button } from "@shared/components/ui/button";
 import {
   Card,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@shared/components/ui/card";
-import { Feather } from "@expo/vector-icons";
 import { ActivityIndicator, Switch, Text, View } from "react-native";
 
 interface DeveloperToolsCardProps {
@@ -59,7 +59,7 @@ export const DeveloperToolsCard = ({
               {isTestingRefresh ? (
                 <ActivityIndicator size="small" color="#fafafa" />
               ) : null}
-              <Text>
+              <Text className="text-secondary-foreground">
                 {isTestingRefresh
                   ? "Testing refresh..."
                   : "Test access token refresh"}
@@ -70,7 +70,7 @@ export const DeveloperToolsCard = ({
           <Button variant="secondary" onPress={onShowNotification}>
             <View className="flex-row items-center gap-2">
               <Feather name="bell" size={16} color="#fafafa" />
-              <Text>Show notification</Text>
+              <Text className="text-secondary-foreground">Show notification</Text>
             </View>
           </Button>
 
