@@ -27,7 +27,6 @@ npx expo start
 Use the Expo terminal shortcuts:
 
 - `a` for Android
-- `w` for web
 - scan the QR code for a physical device
 
 For a native Android build:
