@@ -16,7 +16,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.singlemindinfotech2.minilms"
+      "package": "com.lms.minilms"
     },
     "web": {
       "output": "static",
