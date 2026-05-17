@@ -1,53 +1,80 @@
-# HOE Assignment App
+# Mini LMS
 
-Welcome to the HOE Assignment project! This is a modern, feature-sliced React Native application powered by Expo. It features a completely custom, sleek Dark Mode UI, built-in global notifications, and robust API interceptors.
+Mini LMS is a React Native Expo assignment project for a small learning app. It includes authentication, a native course catalog, course details, enrollment state, local notifications, a WebView lesson screen, profile management, offline handling, and API error handling.
 
-## What's Inside?
+## Quick Setup
 
-We've architected this project using **Feature-Sliced Design**. This means the codebase is separated cleanly by features, rather than tossing everything into giant `components` or `screens` folders. 
+Requirements:
 
-* **`app/`**: This is strictly for **Expo Router**. No deep business logic lives here. It just defines our URLs and mounts the screens from `src`.
-* **`src/features/`**: The core logic! This houses isolated modules like `auth` which contain their own `api`, `components`, `screens`, `types`, etc.
-* **`src/shared/`**: Global reusable components (like our custom `<Input />` and polymorphic `<Button />`), hooks, and utilities.
-* **`src/lib/`**: Global setups like our Axios instance and async storage wrappers.
-* **`src/theme/`**: The global styling tokens (check out `colors.ts` for our dark theme palette).
+- Node.js 20 or newer
+- npm
+- Expo CLI through `npx`
+- Android Studio for Android builds, or Expo Go for quick device testing /
+- or Development Build installed on android device
 
-## Getting Started
+Install dependencies:
 
-Follow these steps to get the app running on your machine:
-
-### 1. Install Dependencies
-Make sure you are in the project root, then install the packages:
 ```bash
 npm install
 ```
 
-### 2. Environment Variables
-This project relies on environment variables for API connections.
-* Look for or create an `.env` file in the root directory.
-* Add your API URL like this:
+Create `.env` in the project root:
+
 ```env
 EXPO_PUBLIC_API_URL=https://api.freeapi.app/api/v1
 ```
 
-*(Note: Because we prefix with `EXPO_PUBLIC_`, Expo will automatically bundle this for us!)*
+Start the app:
 
-### 3. Run the Development Server
-You can fire up the Expo dev server with:
 ```bash
 npx expo start
 ```
-* **To run on Android (Emulator or physical device via USB):** press `a` or run `npx expo run:android`
-* **To run on iOS (Simulator):** press `i` or run `npx expo run:ios`
-* **To run on Web:** press `w`
 
-*(Pro tip: If you change `.env` or `tsconfig.json` paths, you might need to clear your cache. Just run `npx expo start -c` to wipe it clean and restart.)*
+Run targets:
 
-## Key Features Implemented So Far
+```bash
+npx expo run:android
+npx expo start --web
+```
 
-1. **Custom Theming**: We use a beautiful dark theme (`#09090b` backgrounds, `#ffffff` accents) injected throughout the entire app natively.
-2. **Robust API Interceptors**: We use Axios to catch `401` errors, manage token refreshes automatically, and automatically attach `Bearer` tokens to every request.
-3. **Advanced Error Handling**: If an API returns nested validation errors, our logic automatically digs into the response payload and extracts the exact string (like "Username must be lowercase") to show the user.
-4. **Custom Toast Notifications**: We completely redesigned the default `react-native-toast-message` component to look like a premium, floating dark card with drop shadows and Feather icons.
+If native assets or environment values look stale, restart Expo with:
 
-Enjoy building!
+```bash
+npx expo start -c
+```
+
+## What Is Included
+
+- Email/username registration and login
+- Secure token storage with automatic refresh handling
+- Course list built from FreeAPI products and users
+- Search, bookmarks, pagination, pull to refresh, and cached course data
+- Course details with instructor information and enrollment
+- Profile screen with current user API, avatar picker, local stats, and logout
+- Local notifications for enrollment milestone and background reminder
+- WebView lesson screen using bundled HTML, headers, injected metadata, and validated messages
+- Offline banner, retry states, shimmer loading, and clear error UI
+
+## Documentation
+
+The submission notes are split by topic:
+
+- [Documentation Index](./docs/README.md)
+- [Setup](./docs/setup.md)
+- [Assignment Checklist](./docs/assignment-checklist.md)
+- [Project Structure](./docs/project-structure.md)
+- [Authentication](./docs/authentication.md)
+- [Course Catalog](./docs/course-catalog.md)
+- [WebView Integration](./docs/webview-integration.md)
+- [Notifications](./docs/notifications.md)
+- [State and Performance](./docs/state-performance.md)
+- [Error Handling](./docs/error-handling.md)
+
+## Main Commands
+
+```bash
+npm run start
+npm run android
+npm run web
+npm run lint
+```
