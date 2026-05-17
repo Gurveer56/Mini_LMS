@@ -1,16 +1,25 @@
 # Mini LMS
 
-Mini LMS is a React Native Expo assignment project for a small learning app. It includes authentication, a native course catalog, course details, enrollment state, local notifications, a WebView lesson screen, profile management, offline handling, and API error handling.
+Mini LMS is a React Native Expo assignment project that demonstrates authentication, native course browsing, WebView integration, notifications, persistent state, and offline/error handling using the FreeAPI public endpoints.
 
-## Quick Setup
+## Submission Summary
+
+- Framework: React Native Expo SDK 55
+- Language: TypeScript with `strict: true`
+- Navigation: Expo Router
+- Styling: NativeWind
+- Sensitive storage: Expo SecureStore
+- App storage: AsyncStorage
+- List optimization: `@legendapp/list`
+
+## Setup
 
 Requirements:
 
 - Node.js 20 or newer
 - npm
+- Android Studio for Android builds, emulator usage, or device deployment
 - Expo CLI through `npx`
-- Android Studio for Android builds, or Expo Go for quick device testing /
-- or Development Build installed on android device
 
 Install dependencies:
 
@@ -24,40 +33,73 @@ Create `.env` in the project root:
 EXPO_PUBLIC_API_URL=https://api.freeapi.app/api/v1
 ```
 
-Start the app:
+Run the project:
 
 ```bash
 npx expo start
 ```
 
-Run targets:
+Useful commands:
 
 ```bash
-npx expo run:android
-npx expo start --web
-```
-
-If native assets or environment values look stale, restart Expo with:
-
-```bash
+npm run android
+npm run web
+npm run lint
 npx expo start -c
 ```
 
-## What Is Included
+## Features Implemented
 
-- Email/username registration and login
-- Secure token storage with automatic refresh handling
-- Course list built from FreeAPI products and users
-- Search, bookmarks, pagination, pull to refresh, and cached course data
-- Course details with instructor information and enrollment
-- Profile screen with current user API, avatar picker, local stats, and logout
-- Local notifications for enrollment milestone and background reminder
-- WebView lesson screen using bundled HTML, headers, injected metadata, and validated messages
-- Offline banner, retry states, shimmer loading, and clear error UI
+- User registration and login with FreeAPI user endpoints
+- Secure token storage and automatic session restoration on app restart
+- Token refresh flow with Axios interceptors and guarded retry logic
+- Profile screen with user info, local avatar picker, and learning stats
+- Native course catalog built from FreeAPI `randomproducts` and `randomusers`
+- Search, bookmarking, pagination, pull-to-refresh, and local persistence
+- Course details with enroll state, bookmark toggle, and progress feedback
+- WebView lesson screen with bundled local HTML
+- Native-to-web data bridge using custom headers and injected metadata
+- Web-to-native communication using validated `postMessage` events
+- Local notifications for milestone bookmarks and 24-hour return reminders
+- Offline banner, API retry handling, timeout handling, and empty/error states
+
+## Screenshots
+
+![Welcome screen](./docs/screenshots/image.png)
+
+![Login screen](./docs/screenshots/image-1.png)
+
+![Register Screen](./docs/screenshots/image-2.png)
+
+![Home screen](./docs/screenshots/image-3.png)
+
+![Course Detail Screen](./docs/screenshots/image-4.png)
+
+![WebView Screen](./docs/screenshots/image-5.png)
+
+![Profile screen](./docs/screenshots/image-6.png)
+
+![Offline banner](./docs/screenshots/image-7.png)
+
+## Architectural Decisions
+
+- Expo Router is used for route-based navigation and auth-gated app sections.
+- Zustand stores are split by feature so auth, courses, bookmarks, enrollment, and preferences stay isolated and easier to persist.
+- SecureStore is used only for sensitive auth data, while AsyncStorage is used for app-level cached and user preference data.
+- Public FreeAPI product and user records are mapped into a course/instructor domain model so the app behaves like an LMS instead of a generic sample-data browser.
+- WebView content is bundled locally and receives only non-sensitive metadata. Authentication tokens are never injected into the web layer.
+- Axios interceptors handle auth token attachment, refresh, and request retry to keep API behavior consistent across features.
+- LegendList is used for the course feed to satisfy the assignment requirement and to keep scrolling performant with memoized item rendering.
+
+## Known Limitations
+
+- FreeAPI product images were unreliable during testing, so the app uses a stable fallback course image for a consistent visual result.
+- There is no automated test suite in the current submission.
+- The profile avatar update is stored locally for the app experience and is not uploaded to a backend profile endpoint.
 
 ## Documentation
 
-The submission notes are split by topic:
+Additional notes are split by topic:
 
 - [Documentation Index](./docs/README.md)
 - [Setup](./docs/setup.md)
@@ -69,12 +111,3 @@ The submission notes are split by topic:
 - [Notifications](./docs/notifications.md)
 - [State and Performance](./docs/state-performance.md)
 - [Error Handling](./docs/error-handling.md)
-
-## Main Commands
-
-```bash
-npm run start
-npm run android
-npm run web
-npm run lint
-```
