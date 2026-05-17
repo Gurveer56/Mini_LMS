@@ -55,9 +55,7 @@ export const EnrolledCoursesSection = ({
           >
             <Image
               source={{
-                // API thumbnails are unreliable for this demo. Restore this if
-                // testers ask to validate product images from the API.
-                // uri: item.course?.thumbnail || COURSE_CARD_IMAGE_URI,
+                // item.course?.thumbnail || COURSE_CARD_IMAGE_URI,    
                 uri: COURSE_CARD_IMAGE_URI,
               }}
               style={{ width: "100%", height: 120 }}
