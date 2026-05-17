@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       showApiErrorToast(error, { title: 'Logout Failed' });
     }
     await clearAuthStorage();
-    // Delete all app storage keys (bookmarks, enrollments, etc.)
+    
     try {
       const keys = Object.values(APP_STORAGE_KEYS);
       await Promise.all(keys.map((key) => deleteAppStorage(key)));

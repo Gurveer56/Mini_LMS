@@ -38,9 +38,6 @@ export const CourseListItem = memo(
         ),
       [course.discountPercentage, course.price],
     );
-
-    // API thumbnails are unreliable for this demo. Restore this block if testers ask
-    // to validate product images from the API.
     // const imageUri = course.thumbnail || course.images[0] || COURSE_CARD_IMAGE_URI;
     const imageUri = COURSE_CARD_IMAGE_URI;
 

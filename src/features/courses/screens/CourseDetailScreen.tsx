@@ -89,9 +89,8 @@ export const CourseDetailScreen = () => {
         if (isMounted) {
           setRemoteCourse(mapProductAndInstructorToCourse(product, instructor));
         }
-      } catch {
-        // Keep the existing "Course not found" fallback if the selected ID fails.
-      } finally {
+      } catch {} 
+      finally {
         if (isMounted) {
           setIsLoadingCourse(false);
         }
@@ -226,8 +225,6 @@ export const CourseDetailScreen = () => {
         <View style={{ paddingTop: insets.top }} className="relative">
           <Image
             source={{
-              // API thumbnails are unreliable for this demo. Restore the API
-              // thumbnail if testers ask to validate product images.
               // uri: course.thumbnail || COURSE_CARD_IMAGE_URI,
               uri: COURSE_CARD_IMAGE_URI,
             }}
