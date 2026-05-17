@@ -4,7 +4,7 @@ import { Course } from "@features/courses/types";
 import { getCourseItemKey } from "@features/courses/utils/courseListKeys";
 import { Text } from "@shared/components/ui/text";
 import { Image } from "expo-image";
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { useBookmarkStore } from "../store/useBookmarkStore";
 
@@ -30,6 +30,15 @@ export const CourseListItem = memo(
       void toggleBookmark(course.id);
     }, [course.id, toggleBookmark]);
 
+    const salePrice = useMemo(
+      () =>
+        Math.max(
+          0,
+          course.price - course.price * (course.discountPercentage / 100),
+        ),
+      [course.discountPercentage, course.price],
+    );
+
     // API thumbnails are unreliable for this demo. Restore this block if testers ask
     // to validate product images from the API.
     // const imageUri = course.thumbnail || course.images[0] || COURSE_CARD_IMAGE_URI;
@@ -38,7 +47,7 @@ export const CourseListItem = memo(
     return (
       <Pressable
         onPress={handlePress}
-        className="mb-4 rounded-2xl overflow-hidden border border-border bg-card active:opacity-95"
+        className="mb-4 overflow-hidden rounded-lg border border-border bg-card active:opacity-95"
       >
         <View style={{ height: CARD_IMAGE_HEIGHT }} className="relative">
           <Image
@@ -51,15 +60,15 @@ export const CourseListItem = memo(
           />
           <View
             className="absolute inset-0"
-            style={{ backgroundColor: "rgba(9, 9, 11, 0.35)" }}
+            style={{ backgroundColor: "rgba(9, 9, 11, 0.28)" }}
           />
           <View className="absolute top-3 left-3 flex-row gap-2">
-            <View className="rounded-full bg-black/50 px-2.5 py-1 border border-white/10">
+            <View className="rounded-md bg-black/55 px-2.5 py-1 border border-white/10">
               <Text className="text-foreground text-xs font-medium capitalize">
                 {course.category}
               </Text>
             </View>
-            <View className="rounded-full bg-black/50 px-2.5 py-1 border border-white/10 flex-row items-center gap-1">
+            <View className="rounded-md bg-black/55 px-2.5 py-1 border border-white/10 flex-row items-center gap-1">
               <Feather name="star" size={12} color="#fbbf24" />
               <Text className="text-foreground text-xs font-semibold">
                 {course.rating}
@@ -72,7 +81,7 @@ export const CourseListItem = memo(
               handleBookmarkPress();
             }}
             hitSlop={12}
-            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/45 border border-white/15 items-center justify-center"
+            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/55 border border-white/15 items-center justify-center"
             accessibilityRole="button"
             accessibilityLabel={
               isBookmarked ? "Remove bookmark" : "Add bookmark"
@@ -95,33 +104,48 @@ export const CourseListItem = memo(
         </View>
 
         <View className="p-4 gap-3">
-          <View className="flex-row items-center gap-2">
-            {course.instructor.picture ? (
-              <Image
-                source={{ uri: course.instructor.picture }}
-                style={{ width: 28, height: 28, borderRadius: 14 }}
-                contentFit="cover"
-                cachePolicy="memory-disk"
-              />
-            ) : (
-              <View className="w-7 h-7 rounded-full bg-muted items-center justify-center">
-                <Feather name="user" size={14} color="#a1a1aa" />
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1 gap-2">
+              <View className="flex-row items-center gap-2">
+                {course.instructor.picture ? (
+                  <Image
+                    source={{ uri: course.instructor.picture }}
+                    style={{ width: 28, height: 28, borderRadius: 14 }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                  />
+                ) : (
+                  <View className="w-7 h-7 rounded-full bg-muted items-center justify-center">
+                    <Feather name="user" size={14} color="#a1a1aa" />
+                  </View>
+                )}
+                <View className="flex-1">
+                  <Text className="text-muted-foreground text-xs">
+                    Instructor
+                  </Text>
+                  <Text
+                    className="text-foreground text-sm font-medium"
+                    numberOfLines={1}
+                  >
+                    {course.instructor.name}
+                  </Text>
+                </View>
               </View>
-            )}
-            <View className="flex-1">
-              <Text className="text-muted-foreground text-xs">Instructor</Text>
-              <Text className="text-foreground text-sm font-medium" numberOfLines={1}>
-                {course.instructor.name}
-              </Text>
             </View>
-            <View className="rounded-xl bg-primary px-3 py-1.5">
-              <Text className="text-primary-foreground text-sm font-bold">
+            <View className="items-end">
+              <Text className="text-foreground text-lg font-bold">
+                ${salePrice.toFixed(0)}
+              </Text>
+              <Text className="text-muted-foreground text-xs line-through">
                 ${course.price}
               </Text>
             </View>
           </View>
 
-          <Text className="text-muted-foreground text-sm leading-5" numberOfLines={2}>
+          <Text
+            className="text-muted-foreground text-sm leading-5"
+            numberOfLines={2}
+          >
             {course.description}
           </Text>
 
@@ -144,6 +168,7 @@ export const CourseListItem = memo(
     prev.course.thumbnail === next.course.thumbnail &&
     prev.course.rating === next.course.rating &&
     prev.course.price === next.course.price &&
+    prev.course.discountPercentage === next.course.discountPercentage &&
     prev.course.instructor.name === next.course.instructor.name,
 );
 
@@ -154,7 +179,7 @@ interface MetaChipProps {
 
 const MetaChip = memo(function MetaChip({ icon, label }: MetaChipProps) {
   return (
-    <View className="flex-row items-center gap-1 rounded-lg bg-muted/50 px-2.5 py-1">
+    <View className="flex-row items-center gap-1 rounded-md bg-muted/50 px-2.5 py-1">
       <Feather name={icon} size={12} color="#a1a1aa" />
       <Text className="text-muted-foreground text-xs">{label}</Text>
     </View>

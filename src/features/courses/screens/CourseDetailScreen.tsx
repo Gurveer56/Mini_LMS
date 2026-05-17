@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
+  StyleSheet,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -55,6 +56,15 @@ export const CourseDetailScreen = () => {
   const [enrollSuccess, setEnrollSuccess] = useState(false);
 
   const course = cachedCourse ?? remoteCourse;
+  const discountedPrice = useMemo(() => {
+    if (!course) {
+      return 0;
+    }
+    return Math.max(
+      0,
+      course.price - course.price * (course.discountPercentage / 100),
+    );
+  }, [course]);
 
   useEffect(() => {
     void hydrateBookmarks();
@@ -213,7 +223,7 @@ export const CourseDetailScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ paddingTop: insets.top }}>
+        <View style={{ paddingTop: insets.top }} className="relative">
           <Image
             source={{
               // API thumbnails are unreliable for this demo. Restore the API
@@ -224,22 +234,22 @@ export const CourseDetailScreen = () => {
             style={{ width: "100%", height: 220, backgroundColor: "#ffffffa5" }}
             contentFit="cover"
           />
-        </View>
-
-        <View className="px-6 pt-4 gap-4">
-          <View className="flex-row items-start justify-between gap-3">
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-foreground">
-                {course.title}
-              </Text>
-              <Text className="text-muted-foreground mt-1 capitalize">
-                {course.category} - {course.brand}
-              </Text>
-            </View>
-
+          <View style={StyleSheet.absoluteFill} className="bg-black/25" />
+          <View
+            className="absolute left-6 right-6 flex-row items-center justify-between"
+            style={{ top: insets.top + 12 }}
+          >
+            <Pressable
+              onPress={() => router.back()}
+              className="w-11 h-11 rounded-full bg-black/55 border border-white/15 items-center justify-center"
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Feather name="chevron-left" size={24} color="#fafafa" />
+            </Pressable>
             <Pressable
               onPress={() => void handleToggleBookmark()}
-              className="w-11 h-11 rounded-full bg-muted items-center justify-center"
+              className="w-11 h-11 rounded-full bg-black/55 border border-white/15 items-center justify-center"
               accessibilityRole="button"
               accessibilityLabel={
                 isBookmarked ? "Remove bookmark" : "Add bookmark"
@@ -247,13 +257,50 @@ export const CourseDetailScreen = () => {
             >
               <Feather
                 name="bookmark"
-                size={22}
-                color={isBookmarked ? "#ffffff" : "#a1a1aa"}
+                size={21}
+                color={isBookmarked ? "#ffffff" : "#d4d4d8"}
               />
             </Pressable>
           </View>
+          <View className="absolute bottom-4 left-6 right-6">
+            <View className="self-start rounded-md bg-black/55 px-2.5 py-1 border border-white/10 mb-2">
+              <Text className="text-foreground text-xs font-medium capitalize">
+                {course.category}
+              </Text>
+            </View>
+            <Text className="text-foreground text-3xl font-bold" numberOfLines={2}>
+              {course.title}
+            </Text>
+          </View>
+        </View>
 
-          <View className="flex-row items-center gap-3 bg-muted/30 rounded-xl p-3">
+        <View className="px-6 pt-4 gap-4">
+          <View className="flex-row flex-wrap items-center gap-2">
+            <InfoChip icon="star" label={`${course.rating} rating`} />
+            <InfoChip icon="briefcase" label={course.brand} />
+            <InfoChip icon="users" label={`${course.stock} seats left`} />
+          </View>
+
+          <View className="flex-row items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
+            <View>
+              <Text className="text-muted-foreground text-xs">Course price</Text>
+              <View className="flex-row items-end gap-2">
+                <Text className="text-foreground text-2xl font-bold">
+                  ${discountedPrice.toFixed(0)}
+                </Text>
+                <Text className="text-muted-foreground text-sm line-through mb-1">
+                  ${course.price}
+                </Text>
+              </View>
+            </View>
+            <View className="rounded-md bg-primary px-3 py-1.5">
+              <Text className="text-primary-foreground text-sm font-bold">
+                {course.discountPercentage}% off
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center gap-3 rounded-lg border border-border bg-card p-4">
             <Image
               source={{ uri: course.instructor.picture }}
               style={{ width: 48, height: 48, borderRadius: 24 }}
@@ -264,20 +311,13 @@ export const CourseDetailScreen = () => {
               <Text className="text-foreground font-semibold">
                 {course.instructor.name}
               </Text>
-              <Text className="text-muted-foreground text-sm">
+              <Text className="text-muted-foreground text-sm" numberOfLines={1}>
                 {course.instructor.email}
               </Text>
             </View>
           </View>
 
-          <View className="flex-row flex-wrap gap-3">
-            <InfoPill label="Rating" value={`${course.rating} stars`} />
-            <InfoPill label="Price" value={`$${course.price}`} />
-            <InfoPill label="Discount" value={`${course.discountPercentage}%`} />
-            <InfoPill label="Seats" value={`${course.stock} left`} />
-          </View>
-
-          <View>
+          <View className="rounded-lg border border-border bg-card p-4">
             <Text className="text-lg font-semibold text-foreground mb-2">
               About this course
             </Text>
@@ -286,7 +326,7 @@ export const CourseDetailScreen = () => {
             </Text>
           </View>
 
-          <View className="flex-row items-center gap-3 bg-muted/30 rounded-xl p-3">
+          <View className="flex-row items-center gap-3 rounded-lg border border-border bg-card p-4">
             <View className="w-10 h-10 rounded-full bg-muted items-center justify-center">
               <Feather
                 name={isLessonComplete ? "check-circle" : "clock"}
@@ -315,7 +355,7 @@ export const CourseDetailScreen = () => {
           >
             <View className="flex-row items-center justify-center gap-2">
               <Feather name="book-open" size={18} color="#fafafa" />
-              <Text>View course content (WebView)</Text>
+              <Text>Open course content</Text>
             </View>
           </Button>
 
@@ -363,16 +403,16 @@ export const CourseDetailScreen = () => {
   );
 };
 
-interface InfoPillProps {
+interface InfoChipProps {
+  icon: keyof typeof Feather.glyphMap;
   label: string;
-  value: string;
 }
 
-const InfoPill = React.memo(function InfoPill({ label, value }: InfoPillProps) {
+const InfoChip = React.memo(function InfoChip({ icon, label }: InfoChipProps) {
   return (
-    <View className="bg-muted/40 rounded-lg px-3 py-2 min-w-[46%] flex-grow">
+    <View className="flex-row items-center gap-1.5 rounded-md bg-muted/50 px-2.5 py-1.5">
+      <Feather name={icon} size={13} color="#a1a1aa" />
       <Text className="text-muted-foreground text-xs">{label}</Text>
-      <Text className="text-foreground font-semibold">{value}</Text>
     </View>
   );
 });
