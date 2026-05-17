@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export const WelcomeScreen = () => {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const logoWidth = Math.min(220, width * 0.58);
+  const logoWidth = Math.min(60, width * 3);
 
   return (
     <View className="flex-1 bg-background">
@@ -26,15 +26,22 @@ export const WelcomeScreen = () => {
         }}
       >
         <View className="flex-1 justify-center">
+          <View className="flex-row items-center mb-6 gap-1">
+
           <Image
-            source={require("../../../../assets/images/brand-logo.png")}
+            source={require("../../../../assets/images/android-icon-foreground.png")}
             style={{
               width: logoWidth,
-              height: logoWidth / 3.33,
-              marginBottom: 24,
+              height: logoWidth / .8,
             }}
-            contentFit="contain"
-          />
+            contentFit="cover"
+            />
+            <View>
+
+            <Text className="text-xl font-bold">Mini LMS </Text>
+            <Text className="text-xs font-light">mobile learning platform</Text>
+            </View>
+            </View>
           <Text className="text-4xl font-bold text-foreground leading-tight">
             Learn without{"\n"}limits.
           </Text>

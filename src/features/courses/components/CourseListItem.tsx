@@ -38,7 +38,7 @@ export const CourseListItem = memo(
         ),
       [course.discountPercentage, course.price],
     );
-    // const imageUri = course.thumbnail || course.images[0] || COURSE_CARD_IMAGE_URI;
+
     const imageUri = COURSE_CARD_IMAGE_URI;
 
     return (
@@ -77,8 +77,9 @@ export const CourseListItem = memo(
               event.stopPropagation();
               handleBookmarkPress();
             }}
+            style={{backgroundColor: isBookmarked ? "#fbbf24" : '#000000c0'}}
             hitSlop={12}
-            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/55 border border-white/15 items-center justify-center"
+            className="absolute top-3 right-3 w-10 h-10 rounded-full  items-center justify-center"
             accessibilityRole="button"
             accessibilityLabel={
               isBookmarked ? "Remove bookmark" : "Add bookmark"

@@ -273,7 +273,7 @@ export const CourseContentWebViewScreen = () => {
         style={{ paddingBottom: insets.bottom + 8 }}
       >
         <Text className="text-muted-foreground text-xs text-center">
-          Secure bridge - headers + validated postMessage - no tokens in web
+          Lesson progress is saved on this device.
         </Text>
       </View>
     </View>

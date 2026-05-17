@@ -6,7 +6,7 @@ import { LegendList } from "@legendapp/list";
 import React, { memo, useCallback } from "react";
 import { ActivityIndicator, View } from "react-native";
 
-const ESTIMATED_ITEM_SIZE = 340;
+const ESTIMATED_ITEM_SIZE = 250;
 
 export interface CoursesLegendListProps {
   courses: Course[];

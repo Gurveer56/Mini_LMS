@@ -89,8 +89,8 @@ export const CourseDetailScreen = () => {
         if (isMounted) {
           setRemoteCourse(mapProductAndInstructorToCourse(product, instructor));
         }
-      } catch {} 
-      finally {
+      } catch {
+      } finally {
         if (isMounted) {
           setIsLoadingCourse(false);
         }
@@ -225,7 +225,6 @@ export const CourseDetailScreen = () => {
         <View style={{ paddingTop: insets.top }} className="relative">
           <Image
             source={{
-              // uri: course.thumbnail || COURSE_CARD_IMAGE_URI,
               uri: COURSE_CARD_IMAGE_URI,
             }}
             style={{ width: "100%", height: 220, backgroundColor: "#ffffffa5" }}
