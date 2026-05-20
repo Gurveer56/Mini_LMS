@@ -48,12 +48,6 @@ npm run lint
 npx expo start -c
 ```
 
-## Demo Video
-
-Demo video: [https://drive.google.com/file/d/1Db54idJbtXDuVhRvEYrOQbE3YjWyETuF/view?usp=sharing]()
-
-The demo video walks through the main app flow: welcome screen, registration, login, course catalog, search/bookmarks, course details, enrollment, WebView course content, profile and logout.
-
 ## Features Implemented
 
 - User registration and login with FreeAPI user endpoints
