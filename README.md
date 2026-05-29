@@ -48,6 +48,13 @@ npm run lint
 npx expo start -c
 ```
 
+## Dev APK Download
+
+You can download the latest development APK from the link below:
+
+[Download Dev APK](https://drive.google.com/file/d/1uELaSccLY85EM2rNY79mxwCKLpaepw_r/view?usp=sharing)
+
+
 ## Features Implemented
 
 - User registration and login with FreeAPI user endpoints
